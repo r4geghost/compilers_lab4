@@ -1,6 +1,7 @@
 package ru.dyusov;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public class Parser {
     protected HashMap<String, String> first = new HashMap<>() {{
@@ -20,6 +21,10 @@ public class Parser {
         put("not_factor", "NOT");
     }};
 
+    protected Stack<String> stack = new Stack<>();
+    protected String postfix = "";
+    protected String current = "";
+
     private int i = 0;
     private String s = null;
 
@@ -35,6 +40,10 @@ public class Parser {
         try {
             run();
             res = i == s.length();
+            // push everything left in stack to postfix
+            while (!stack.isEmpty()) {
+                postfix = new StringBuffer(postfix).append(stack.pop()).toString();
+            }
         } catch (Exception e) {
             System.out.println("ERROR: " + e.getMessage());
         }
@@ -54,7 +63,12 @@ public class Parser {
     protected void subStrStartWithTerm(String... items) throws Exception {
         for (String item : items)
             if (s.substring(i).startsWith(item)) {
+                int old = i;
                 i += item.length();
+                current = s.substring(old, i);
+                System.out.println("current: " + current);
+                System.out.println("postfix: " + postfix);
+                System.out.println("stack: " + stack);
                 return;
             }
         throw new Exception(String.format("Unexpected symbol in input string, position=%d", i));
@@ -119,57 +133,114 @@ public class Parser {
         if (inFirst("identifier")) {
             System.out.println("            -> identifier");
             identifier();
-        }
-        else if (inFirst("constant")) {
+        } else if (inFirst("constant")) {
             System.out.println("            -> identifier");
             constant();
-        }
-        else if (inFirst("simple_expression_brackets")) {
+        } else if (inFirst("simple_expression_brackets")) {
             System.out.println("            -> simple_expression_brackets");
             simpleExpressionBrackets();
-        }
-        else if (inFirst("not_factor")) {
+        } else if (inFirst("not_factor")) {
             System.out.println("            -> not_factor");
             notFactor();
             System.out.println("            -> factor");
             factor();
-        }
-        else
+        } else
             throw new Exception(String.format("Unexpected symbol in input string, position=%d", i));
     }
 
     private void simpleExpressionBrackets() throws Exception {
         subStrStartWithTerm("(");
+        addToStack("(");
         simpleExpression();
         subStrStartWithTerm(")");
+        addToStack(")");
     }
 
     private void opRelationship() throws Exception {
         subStrStartWithTerm("<>", "<=", ">=", "<", "=", ">");
+        addToStack("<>", "<=", ">=", "<", "=", ">");
     }
 
     private void opSum() throws Exception {
         subStrStartWithTerm("+", "-", "0R");
+        addToStack("+", "-", "0R");
     }
 
     private void opMult() throws Exception {
         subStrStartWithTerm("*", "/", "DIV", "MOD", "AND");
+        addToStack("*", "/", "DIV", "MOD", "AND");
     }
 
     protected void identifier() throws Exception {
         subStrStartWithTerm("i");
+        addToPostfix("i");
     }
 
     private void constant() throws Exception {
         subStrStartWithTerm("c");
+        addToPostfix("c");
     }
 
     private void notFactor() throws Exception {
         subStrStartWithTerm("NOT");
+        addToStack("NOT");
     }
 
     private void sign() throws Exception {
         subStrStartWithTerm("+", "-");
+        addToStack("+", "-");
+    }
+
+    private void addToPostfix(String... items) {
+        for (String item : items) {
+            if (item.equals(current)) {
+                postfix = new StringBuffer(postfix).append(current).toString();
+            }
+        }
+    }
+
+    private void addToStack(String... items) {
+        for (String item : items) {
+            if (item.equals(current)) {
+                if (item.equals("=")) {
+                    postfix = new StringBuffer(postfix).append(item).toString();
+                } else if (item.equals(")")) {
+                    while (!stack.isEmpty()) {
+                        String t = stack.pop();
+                        if (!t.equals("(")) {
+                            postfix = new StringBuffer(postfix).append(t).toString();
+                        } else {
+                            pushToPostfix();
+                        }
+                    }
+                } else {
+                    pushToPostfix();
+                    stack.push(current);
+                }
+            }
+        }
+    }
+
+    private void pushToPostfix() {
+        while (!stack.isEmpty() && hasLowerPrecedence(current, stack.peek())) {
+            if (!stack.peek().equals("(")) {
+                postfix = new StringBuffer(postfix).append(stack.pop()).toString();
+            } else {
+                break;
+            }
+        }
+    }
+
+    private boolean hasLowerPrecedence(String operator1, String operator2) {
+        return precedence(operator1) <= precedence(operator2);
+    }
+
+    private int precedence(String operator) {
+        return switch (operator) {
+            case "+", "-" -> 1;
+            case "*", "/" -> 2;
+            default -> 3;
+        };
     }
 }
 
