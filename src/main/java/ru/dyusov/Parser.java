@@ -237,8 +237,8 @@ public class Parser {
 
     private int precedence(String operator) {
         return switch (operator) {
-            case "+", "-" -> 1;
-            case "*", "/" -> 2;
+            case "+", "-", "0R" -> 1;
+            case "*", "/", "DIV", "MOD", "AND" -> 2;
             default -> 3;
         };
     }
