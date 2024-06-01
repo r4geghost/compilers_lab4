@@ -4,21 +4,18 @@ public class Main {
     public static void main(String[] args) {
         Parser parser = new Parser();
         System.out.println("Default parser:");
-//        System.out.println(parser.eval("c+(c*c)"));
-//        System.out.println(parser.eval("cMODc"));
-//        System.out.println(parser.eval("c=-i"));
-//        System.out.println(parser.eval("c=NOTi"));
+        System.out.println(parser.eval("c*(c+c)"));
+//        System.out.println(parser.eval("c*c+c"));
 //        System.out.println(parser.eval("i>=c"));
 //        System.out.println(parser.eval("i/(c+c)"));
 //        System.out.println(parser.eval("i/c+c"));
 //        System.out.println(parser.eval("c*c+i"));
 //        System.out.println(parser.eval("c*(c+i)"));
 //        System.out.println(parser.eval("(i+c)*(c*i)"));
-
+//
 //        System.out.println(parser.eval("(i+c)*(c+i)"));
-        System.out.println(parser.eval("i+c*c+i"));
-//        System.out.println(parser.eval("i*c+c+i"));
-
+//        System.out.println(parser.eval("i+c*c+i"));
+//
 //        System.out.println(parser.eval("cc"));
 //        System.out.println(parser.eval("i)"));
 //        System.out.println(parser.eval("ic"));

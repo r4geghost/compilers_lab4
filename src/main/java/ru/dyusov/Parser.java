@@ -67,8 +67,8 @@ public class Parser {
                 i += item.length();
                 current = s.substring(old, i);
                 System.out.println("current: " + current);
-                System.out.println("postfix: " + postfix);
-                System.out.println("stack: " + stack);
+                System.out.println("postfix before: " + postfix);
+                System.out.println("stack before: " + stack);
                 return;
             }
         throw new Exception(String.format("Unexpected symbol in input string, position=%d", i));
